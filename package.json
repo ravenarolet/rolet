@@ -1,0 +1,14 @@
+{
+  "name": "roleta-ravena",
+  "version": "1.0.0",
+  "description": "Roleta interativa com pagamento via Pix",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Antony",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

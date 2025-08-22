@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Roleta da Ravena 🎰</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: radial-gradient(circle, #990000, #330000);
+            color: #fff;
+            text-align: center;
+            padding: 30px;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            color: #ffd700;
+            text-shadow: 0 0 20px #ff0000;
+        }
+
+        #wheel-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 0 auto;
+        }
+
+        #wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 10px solid #ffd700;
+            box-shadow: 0 0 30px #000;
+            position: relative;
+            overflow: hidden;
+            transition: transform 4s cubic-bezier(0.33, 1, 0.68, 1);
+            background: radial-gradient(circle, #222, #000);
+        }
+
+        .segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            left: 50%;
+            top: 50%;
+            transform-origin: 0% 0%;
+            background-color: rgba(255, 0, 0, 0.3);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            padding: 10px;
+            text-align: center;
+            border: 2px solid #ffd700;
+            writing-mode: vertical-lr;
+            text-orientation: mixed;
+        }
+
+        .segment:nth-child(even) {
+            background-color: rgba(255, 215, 0, 0.3);
+        }
+
+        #indicator {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 25px solid #ffd700;
+            z-index: 10;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            background: linear-gradient(to right, #ff0000, #ff9900);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 0 15px #ff0000;
+            transition: transform 0.2s, box-shadow 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px #ffd700;
+        }
+
+        #result {
+            margin-top: 30px;
+            font-size: 1.5em;
+            font-weight: bold;
+            animation: destaque 1s ease-in-out 3;
+        }
+
+        #pixInfo {
+            margin-top: 20px;
+            font-size: 1em;
+            color: #ffd700;
+        }
+
+        @keyframes destaque {
+            0% {
+                transform: scale(1);
+                color: #fff;
+                text-shadow: none;
+            }
+
+            50% {
+                transform: scale(1.3);
+                color: #ffd700;
+                text-shadow: 0 0 10px #ffd700;
+            }
+
+            100% {
+                transform: scale(1);
+                color: #fff;
+                text-shadow: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🎰 Roleta da Ravena</h1>
+    <p>Gire e descubra seu destino misterioso!</p>
+
+    <div id="wheel-container">
+        <div id="indicator"></div>
+        <div id="wheel">
+            <div class="segment" style="transform: rotate(0deg);">Não foi dessa vez</div>
+            <div class="segment" style="transform: rotate(40deg);">Desconto de 50%</div>
+            <div class="segment" style="transform: rotate(80deg);">Foto da bucetinha 🔥</div>
+            <div class="segment" style="transform: rotate(120deg);">Áudio gemendo 🎧</div>
+            <div class="segment" style="transform: rotate(160deg);">Foto do cuzinho 📸</div>
+            <div class="segment" style="transform: rotate(200deg);">Foto do corpo 🔥</div>
+            <div class="segment" style="transform: rotate(240deg);">10 conteúdos secretos 📂</div>
+            <div class="segment" style="transform: rotate(280deg);">50 conteúdos secretos 💎</div>
+            <div class="segment" style="transform: rotate(320deg);">Grupo VIP 👑</div>
+        </div>
+    </div>
+
+    <button id="payBtn">Pagar via Pix 💸</button>
+    <div id="pixInfo"></div>
+
+    <button id="spinBtn">Girar 🎲</button>
+    <div id="result"></div>
+
+    <script>
+        const wheel = document.getElementById('wheel');
+        const result = document.getElementById('result');
+        const spinBtn = document.getElementById('spinBtn');
+        const payBtn = document.getElementById('payBtn');
+        const pixInfo = document.getElementById('pixInfo');
+
+        const segments = [
+            'Não foi dessa vez',
+            'Desconto de 50%',
+            'Foto da bucetinha 🔥',
+            'Áudio gemendo 🎧',
+            'Foto do cuzinho 📸',
+            'Foto do corpo 🔥',
+            '10 conteúdos secretos 📂',
+            '50 conteúdos secretos 💎',
+            'Grupo VIP 👑'
+        ];
+
+        let currentRotation = 0;
+
+        payBtn.addEventListener('click', async () => {
+            const res = await fetch('/pix');
+            const data = await res.json();
+            pixInfo.innerHTML = `
+        <p>💰 Valor: R$ ${data.valor}</p>
+        <p>🔑 Chave Pix: <strong>${data.chavePix}</strong></p>
+        <p>📲 ${data.mensagem}</p>
+      `;
+        });
+
+        spinBtn.addEventListener('click', async () => {
+            spinBtn.disabled = true;
+            result.textContent = '';
+
+            const res = await fetch('/check-payment');
+            const data = await res.json();
+
+            if (!data.paid) {
+                result.textContent = '⚠️ Você precisa pagar via Pix antes de girar.';
+                spinBtn.disabled = false;
+                return;
+            }
+
+            const segmentAngle = 360 / segments.length;
+            const randomIndex = Math.floor(Math.random() * segments.length);
+            const stopAngle = randomIndex * segmentAngle;
+            const offset = segmentAngle / 2;
+            const finalAngle = (360 * 5) + (360 - stopAngle - offset);
+
+            currentRotation += finalAngle;
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+            setTimeout(() => {
+                result.textContent = `Resultado: ${segments[randomIndex]}`;
+                spinBtn.disabled = false;
+            }, 4000);
+        });
+    </script>
+</body>
+
+</html>
